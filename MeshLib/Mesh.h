@@ -17,9 +17,11 @@
 #include <string>
 #include <vector>
 
+// MeshLib
+#include "Node.h"
+
 namespace MeshLib
 {
-	class Node;
 	class Element;
 
 /**
@@ -29,6 +31,17 @@ class Mesh
 {
 
 public:
+	/**
+	 * This constructor for an instance of the class mesh takes the name of the mesh,
+	 * a vector of objects of class Node and a vector of pointers to objects of class elements.
+	 * @param name the name of the mesh (in the case you put your mesh to ProjectData the
+	 * 	name should be unique, otherwise the name will be set to a unique name within the method
+	 * 	ProjectData::addMesh())
+	 * @param nodes the vector of instances of class Node (not pointers to instances of class Node)
+	 * @param elements the vector elements where the nodes of the elements refer to the vector nodes
+	 */
+	Mesh(const std::string &name, const std::vector<Node> &nodes, const std::vector<Element*> &elements);
+
 	/// Constructor using a mesh name and an array of nodes and elements
 	Mesh(const std::string &name, const std::vector<Node*> &nodes, const std::vector<Element*> &elements);
 
@@ -51,7 +64,7 @@ public:
 	double getMaxEdgeLength() { return _edge_length[1]; };
 
 	/// Get the node with the given index.
-	const Node* getNode(unsigned idx) const { return _nodes[idx]; };
+	const Node* getNode(unsigned idx) const { return &_nodes[idx]; };
 
 	/// Get the element with the given index.
 	const Element* getElement(unsigned idx) const { return _elements[idx]; };
@@ -72,7 +85,7 @@ public:
 	const std::string getName() const { return _name; };
 
 	/// Get the nodes-vector for the mesh.
-	std::vector<Node*> const& getNodes() const { return _nodes; };
+	std::vector<Node> const& getNodes() const { return _nodes; };
 
 	/// Get the element-vector for the mesh.
 	std::vector<Element*> const& getElements() const { return _elements; };
@@ -102,7 +115,7 @@ protected:
 
 	double _edge_length[2];
 	std::string _name;
-	std::vector<Node*> _nodes;
+	std::vector<Node> _nodes;
 	std::vector<Element*> _elements;
 
 }; /* class */

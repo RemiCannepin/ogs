@@ -22,7 +22,7 @@
 
 namespace MeshLib {
 
-Mesh::Mesh(const std::string &name, const std::vector<Node*> &nodes, const std::vector<Element*> &elements)
+Mesh::Mesh(const std::string &name, std::vector<Node> const& nodes, const std::vector<Element*> &elements)
 	: _name(name), _nodes(nodes), _elements(elements)
 {
 	this->resetNodeIDs(); // reset node ids so they match the node position in the vector
@@ -33,9 +33,28 @@ Mesh::Mesh(const std::string &name, const std::vector<Node*> &nodes, const std::
 	this->setNeighborInformationForElements();
 }
 
-Mesh::Mesh(const Mesh &mesh)
-	: _name(mesh.getName()), _nodes(mesh.getNodes()), _elements(mesh.getElements())
+Mesh::Mesh(const std::string &name, const std::vector<Node*> &nodes, const std::vector<Element*> &elements)
+	: _name(name), _nodes(), _elements(elements)
 {
+	for (unsigned k(0); k<nodes.size(); k++) {
+		_nodes.push_back(*(nodes[k]));
+	}
+
+	this->resetNodeIDs(); // reset node ids so they match the node position in the vector
+	_edge_length[0] = 0;
+	_edge_length[1] = 0;
+	this->makeNodesUnique();
+	this->setElementInformationForNodes();
+	this->setNeighborInformationForElements();
+}
+
+Mesh::Mesh(const Mesh &mesh)
+	: _name(mesh.getName()), _nodes(), _elements(mesh.getElements())
+{
+	std::vector<Node> const& nodes(mesh.getNodes());
+	for (unsigned k(0); k<nodes.size(); k++) {
+		_nodes.push_back(nodes[k]);
+	}
 	this->setElementInformationForNodes();
 	this->setNeighborInformationForElements();
 }
@@ -46,9 +65,9 @@ Mesh::~Mesh()
 	for (size_t i=0; i<nElements; i++)
 		delete _elements[i];
 
-	const size_t nNodes (_nodes.size());
-	for (size_t i=0; i<nNodes; i++)
-		delete _nodes[i];
+//	const size_t nNodes (_nodes.size());
+//	for (size_t i=0; i<nNodes; i++)
+//		delete _nodes[i];
 }
 
 void Mesh::makeNodesUnique()
@@ -71,7 +90,7 @@ void Mesh::makeNodesUnique()
 
 void Mesh::addNode(Node* node)
 {
-	_nodes.push_back(node);
+	_nodes.push_back(*node);
 }
 
 void Mesh::addElement(Element* elem)
@@ -88,7 +107,7 @@ void Mesh::resetNodeIDs()
 {
 	const size_t nNodes (this->_nodes.size());
 	for (unsigned i=0; i<nNodes; i++)
-		_nodes[i]->setID(i);
+		_nodes[i].setID(i);
 }
 
 void Mesh::setElementInformationForNodes()
