@@ -35,13 +35,13 @@ Mesh* MeshCoarsener::operator()(double min_distance)
 {
 	// copy mesh nodes, reset mesh node ids and
 	// store original mesh node ids in a vector
-	std::vector<Node*> const& orig_nodes(_orig_mesh->getNodes());
+	std::vector<Node> const& orig_nodes(_orig_mesh->getNodes());
 	const size_t n_nodes(orig_nodes.size());
-	std::vector<Node*> nodes(n_nodes);
+	std::vector<Node> nodes(n_nodes);
 	std::map<size_t,size_t> orig_ids_map;
 	for (size_t k(0); k < n_nodes; k++) {
-		nodes[k] = new Node(orig_nodes[k]->getCoords(), k);
-		orig_ids_map.insert(std::pair<size_t, size_t>(orig_nodes[k]->getID(), k));
+		nodes[k] = Node(orig_nodes[k].getCoords(), k);
+		orig_ids_map.insert(std::pair<size_t, size_t>(orig_nodes[k].getID(), k));
 	}
 
 	// init grid
