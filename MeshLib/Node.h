@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "PointWithID.h"
-#include "Mesh.h"
+//#include "Mesh.h"
 
 namespace MeshLib {
 
@@ -32,8 +32,6 @@ class Node : public GeoLib::PointWithID
 	/* friend classes: */
 	friend class Mesh;//void Mesh::setElementInformationForNodes();
 	friend class MeshCoarsener;
-	//friend void Mesh::addElement(Element*);
-
 
 public:
 	/// Constructor using a coordinate array
@@ -44,6 +42,11 @@ public:
 
 	/// Copy constructor
 	Node(const Node &node);
+
+	/**
+	 * standard constructor, needed for creating std::vector<Node>
+	 */
+	Node();
 
 	/// Get an element the node is part of.
 	const Element* getElement(unsigned idx) const { return _elements[idx]; };

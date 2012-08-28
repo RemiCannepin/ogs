@@ -29,6 +29,11 @@ Node::Node(const Node &node)
 {
 }
 
+Node::Node()
+	: GeoLib::PointWithID()
+{
+}
+
 Node::~Node()
 {
 }
