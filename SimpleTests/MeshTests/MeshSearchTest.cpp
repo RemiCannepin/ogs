@@ -114,11 +114,18 @@ int main(int argc, char *argv[])
 	std::vector<GeoLib::Point*> pnts_for_search;
 	unsigned n(std::min(number_arg.getValue(), static_cast<unsigned>(nodes.size())));
 	for (size_t k(0); k<n; k++) {
-		pnts_for_search.push_back(new GeoLib::Point(nodes[k].getCoords()));
+		pnts_for_search.push_back(new GeoLib::PointWithID(nodes[k].getCoords(), nodes[k].getID()));
 	}
 
 	std::vector<size_t> idx_found_nodes;
 	testMeshGridAlgorithm(mesh, pnts_for_search, idx_found_nodes);
+
+	// test result
+	for (size_t k(0); k<n; k++) {
+		if (dynamic_cast<GeoLib::PointWithID*>(pnts_for_search[k])->getID() != idx_found_nodes[k]) {
+			std::cout << "id " << dynamic_cast<GeoLib::PointWithID*>(pnts_for_search[k])->getID() << " not found " << std::endl;
+		}
+	}
 
 	delete mesh;
 	delete custom_format;
