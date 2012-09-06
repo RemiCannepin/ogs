@@ -11,6 +11,7 @@
  */
 
 #include "Node.h"
+#include "Elements/Element.h"
 
 namespace MeshLib {
 
@@ -36,6 +37,18 @@ Node::Node()
 
 Node::~Node()
 {
+}
+
+
+void Node::updateCoordinates(double x, double y, double z)
+{
+	_x[0] = x;
+	_x[1] = y;
+	_x[2] = z;
+
+	const size_t nElements (this->_elements.size());
+	for (unsigned i=0; i<nElements; i++)
+		_elements[i]->computeVolume();
 }
 
 }
