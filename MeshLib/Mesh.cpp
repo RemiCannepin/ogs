@@ -10,6 +10,9 @@
  * Created on 2012-05-02 by Karsten Rink
  */
 
+// BaseLib/logog
+#include "logog.hpp"
+
 #include "Mesh.h"
 
 #include "Node.h"
@@ -28,7 +31,7 @@ Mesh::Mesh(const std::string &name, std::vector<Node> const& nodes, const std::v
 	this->resetNodeIDs(); // reset node ids so they match the node position in the vector
 	_edge_length[0] = 0;
 	_edge_length[1] = 0;
-	this->makeNodesUnique();
+//	this->makeNodesUnique();
 	this->setDimension();
 	this->setNeighborInformationForElements();
 }
@@ -36,14 +39,24 @@ Mesh::Mesh(const std::string &name, std::vector<Node> const& nodes, const std::v
 Mesh::Mesh(const std::string &name, const std::vector<Node*> &nodes, const std::vector<Element*> &elements)
 	: _name(name), _nodes(), _elements(elements)
 {
+	_nodes.reserve(nodes.size());
 	for (unsigned k(0); k<nodes.size(); k++) {
-		_nodes.push_back(*(nodes[k]));
+		_nodes.push_back(MeshLib::Node(*(nodes[k])));
+	}
+
+	// reset the node pointers in the elements
+	INFO("reseting pointers to nodes in elements");
+	for (unsigned k(0); k<elements.size(); k++) {
+		const unsigned n_nodes_per_element (elements[k]->getNNodes());
+		for (unsigned j(0); j<n_nodes_per_element; j++) {
+			elements[k]->setNode(j, &_nodes[elements[k]->getNode(j)->getID()]);
+		}
 	}
 
 	this->resetNodeIDs(); // reset node ids so they match the node position in the vector
 	_edge_length[0] = 0;
 	_edge_length[1] = 0;
-	this->makeNodesUnique();
+//	this->makeNodesUnique();
 	this->setElementInformationForNodes();
 	this->setNeighborInformationForElements();
 }
@@ -51,10 +64,10 @@ Mesh::Mesh(const std::string &name, const std::vector<Node*> &nodes, const std::
 Mesh::Mesh(const Mesh &mesh)
 	: _mesh_dimension(mesh.getDimension()), _name(mesh.getName()), _nodes(mesh.getNodes()), _elements(mesh.getElements())
 {
-	std::vector<Node> const& nodes (mesh.getNodes());
-	const size_t nNodes (nodes.size());
-	for (unsigned i=0; i<nNodes; i++)
-		_nodes[i] = Node(nodes[i]);
+//	std::vector<Node> const& nodes (mesh.getNodes());
+//	const size_t nNodes (nodes.size());
+//	for (unsigned i=0; i<nNodes; i++)
+//		_nodes[i] = Node(nodes[i]);
 
 	const std::vector<Element*> elements (mesh.getElements());
 	const size_t nElements (elements.size());
