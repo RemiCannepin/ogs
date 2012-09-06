@@ -32,7 +32,7 @@
 namespace FileIO {
 
 using namespace rapidxml;
-	
+
 VTKInterface::VTKInterface()
 : _export_name(""), _mesh(NULL), _doc(new xml_document<>), _use_compressor(false)
 {
@@ -82,7 +82,7 @@ MeshLib::Mesh* VTKInterface::readVTUFile(const std::string &file_name)
 			std::vector<unsigned> cell_types(nElems);
 
 			const rapidxml::xml_node<>* mat_id_node (piece_node->first_node("CellData")->first_node("DataArray"));
-			if (mat_id_node && 
+			if (mat_id_node &&
 				((std::string(mat_id_node->first_attribute("Name")->value()).compare("MaterialIDs") == 0) ||
 				 (std::string(mat_id_node->first_attribute("Name")->value()).compare("MatGroup") == 0)))
 			{
@@ -98,9 +98,9 @@ MeshLib::Mesh* VTKInterface::readVTUFile(const std::string &file_name)
 
 
 			const rapidxml::xml_node<>* points_node (piece_node->first_node("Points")->first_node("DataArray"));
-			// This _may_ have an attribute "Name" with the value "Points" but you cannot count on it. 
+			// This _may_ have an attribute "Name" with the value "Points" but you cannot count on it.
 			// However, there shouldn't be any other DataArray nodes so most likely not checking the name isn't a problem.
-			if (points_node) 
+			if (points_node)
 			{
 				if (std::string(points_node->first_attribute("format")->value()).compare("ascii") == 0)
 				{
@@ -253,7 +253,7 @@ int VTKInterface::write(std::ostream& stream)
 
 	const size_t nNodes (_mesh->getNNodes());
 	const size_t nElems (_mesh->getNElements());
-	const std::vector<MeshLib::Node*> &nodes (_mesh->getNodes());
+	const std::vector<MeshLib::Node> &nodes (_mesh->getNodes());
 	const std::vector<MeshLib::Element*> &elements (_mesh->getElements());
 
 	const std::string data_array_close("\t\t\t\t");
@@ -300,7 +300,7 @@ int VTKInterface::write(std::ostream& stream)
 	piece_node->append_node(points_node);
 	oss << std::endl;
 	for (unsigned i=0; i<nNodes; i++)
-		oss << data_array_indent << (*nodes[i])[0] << " " << (*nodes[i])[1] << " " << (*nodes[i])[2] << std::endl;
+		oss << data_array_indent << nodes[i] << std::endl;
 	oss << data_array_close;
 	points_node->append_node(this->addDataArray("Points", "Float32", oss.str(), 3));
 	oss.str(std::string());

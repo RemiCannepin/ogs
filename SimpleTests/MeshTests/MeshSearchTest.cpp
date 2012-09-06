@@ -110,11 +110,11 @@ int main(int argc, char *argv[])
 	INFO ("time for reading: %f s", run_time.elapsed());
 
 	// *** preparing test data
-	std::vector<MeshLib::Node*> const& nodes(mesh->getNodes());
+	std::vector<MeshLib::Node> const& nodes(mesh->getNodes());
 	std::vector<GeoLib::Point*> pnts_for_search;
-	unsigned n(number_arg.getValue());
+	unsigned n(std::min(number_arg.getValue(), static_cast<unsigned>(nodes.size())));
 	for (size_t k(0); k<n; k++) {
-		pnts_for_search.push_back(new GeoLib::Point(nodes[k]->getCoords()));
+		pnts_for_search.push_back(new GeoLib::Point(nodes[k].getCoords()));
 	}
 
 	std::vector<size_t> idx_found_nodes;

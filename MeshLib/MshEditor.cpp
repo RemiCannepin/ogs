@@ -25,92 +25,92 @@ namespace MeshLib {
 
 void MshEditor::getSurfaceAreaForNodes(const MeshLib::Mesh* mesh, std::vector<double> &node_area_vec)
 {
-	if (mesh->getDimension() == 2)
-	{
-		double total_area (0);
-
-		// for each node, a vector containing all the element idget every element
-		std::vector<MeshLib::Node*> nodes = mesh->getNodes();
-		const size_t nNodes ( mesh->getNNodes() );
-		for (size_t n=0; n<nNodes; n++)
-		{
-			double node_area (0);
-
-			std::vector<MeshLib::Element*> conn_elems = nodes[n]->getElements();
-			const size_t nConnElems (conn_elems.size());
-
-			for (size_t i=0; i<nConnElems;i++)
-			{
-				const MeshLib::Element* elem (conn_elems[i]);
-				const unsigned nElemParts = (elem->getType() == MshElemType::TRIANGLE) ? 3 : 4;
-				const double area = conn_elems[i]->getContent() / nElemParts;
-				node_area += area;
-				total_area += area;
-			}
-
-			node_area_vec.push_back(node_area);
-		}
-
-		std::cout<< "Total surface Area: " << total_area << std::endl;
-	}
-	else
-		std::cout << "Error in MshEditor::getSurfaceAreaForNodes() - Given mesh is no surface mesh (dimension != 2)." << std::endl;
+//	if (mesh->getDimension() == 2)
+//	{
+//		double total_area (0);
+//
+//		// for each node, a vector containing all the element idget every element
+//		std::vector<MeshLib::Node*> nodes = mesh->getNodes();
+//		const size_t nNodes ( mesh->getNNodes() );
+//		for (size_t n=0; n<nNodes; n++)
+//		{
+//			double node_area (0);
+//
+//			std::vector<MeshLib::Element*> conn_elems = nodes[n]->getElements();
+//			const size_t nConnElems (conn_elems.size());
+//
+//			for (size_t i=0; i<nConnElems;i++)
+//			{
+//				const MeshLib::Element* elem (conn_elems[i]);
+//				const unsigned nElemParts = (elem->getType() == MshElemType::TRIANGLE) ? 3 : 4;
+//				const double area = conn_elems[i]->getContent() / nElemParts;
+//				node_area += area;
+//				total_area += area;
+//			}
+//
+//			node_area_vec.push_back(node_area);
+//		}
+//
+//		std::cout<< "Total surface Area: " << total_area << std::endl;
+//	}
+//	else
+//		std::cout << "Error in MshEditor::getSurfaceAreaForNodes() - Given mesh is no surface mesh (dimension != 2)." << std::endl;
 }
 
 MeshLib::Mesh* MshEditor::removeMeshNodes(MeshLib::Mesh* mesh,
                                              const std::vector<size_t> &nodes)
 {
-	MeshLib::Mesh* new_mesh (new MeshLib::Mesh(*mesh));
-
-	// delete nodes and their connected elements and replace them with null pointers
-	const size_t delNodes = nodes.size();
-	std::vector<MeshLib::Node*> mesh_nodes = new_mesh->getNodes();
-	for (size_t i = 0; i < delNodes; i++)
-	{
-		const MeshLib::Node* node = new_mesh->getNode(i);
-		std::vector<MeshLib::Element*> conn_elems = node->getElements();
-
-		for (size_t j = 0; j < conn_elems.size(); j++)
-		{
-			delete conn_elems[j];
-			conn_elems[j] = NULL;
-		}
-		delete mesh_nodes[i];
-		mesh_nodes[i] = NULL;
-	}
-
-	// create map to adjust node indices in element vector
-	const size_t nNodes = new_mesh->getNNodes();
-	std::vector<int> id_map(nNodes, -1);
-	size_t count(0);
-	for (size_t i = 0; i < nNodes; i++)
-	{
-		if (mesh_nodes[i])
-		{
-			mesh_nodes[i]->setID(count);
-			id_map.push_back(count++);
-		}
-	}
-
-	// erase null pointers from node- and element vectors
-	std::vector<MeshLib::Element*> elements = new_mesh->getElements();
-	for (std::vector<MeshLib::Element*>::iterator it = elements.begin(); it != elements.end(); )
-	{
-		if (*it)
-			++it;
-		else
-			it = elements.erase(it);
-	}
-
-	for (std::vector<MeshLib::Node*>::iterator it = mesh_nodes.begin(); it != mesh_nodes.end(); )
-	{
-		if (*it)
-			++it;
-		else
-			it = mesh_nodes.erase(it);
-	}
-
-	return new_mesh;
+//	MeshLib::Mesh* new_mesh (new MeshLib::Mesh(*mesh));
+//
+//	// delete nodes and their connected elements and replace them with null pointers
+//	const size_t delNodes = nodes.size();
+//	std::vector<MeshLib::Node*> mesh_nodes = new_mesh->getNodes();
+//	for (size_t i = 0; i < delNodes; i++)
+//	{
+//		const MeshLib::Node* node = new_mesh->getNode(i);
+//		std::vector<MeshLib::Element*> conn_elems = node->getElements();
+//
+//		for (size_t j = 0; j < conn_elems.size(); j++)
+//		{
+//			delete conn_elems[j];
+//			conn_elems[j] = NULL;
+//		}
+//		delete mesh_nodes[i];
+//		mesh_nodes[i] = NULL;
+//	}
+//
+//	// create map to adjust node indices in element vector
+//	const size_t nNodes = new_mesh->getNNodes();
+//	std::vector<int> id_map(nNodes, -1);
+//	size_t count(0);
+//	for (size_t i = 0; i < nNodes; i++)
+//	{
+//		if (mesh_nodes[i])
+//		{
+//			mesh_nodes[i]->setID(count);
+//			id_map.push_back(count++);
+//		}
+//	}
+//
+//	// erase null pointers from node- and element vectors
+//	std::vector<MeshLib::Element*> elements = new_mesh->getElements();
+//	for (std::vector<MeshLib::Element*>::iterator it = elements.begin(); it != elements.end(); )
+//	{
+//		if (*it)
+//			++it;
+//		else
+//			it = elements.erase(it);
+//	}
+//
+//	for (std::vector<MeshLib::Node*>::iterator it = mesh_nodes.begin(); it != mesh_nodes.end(); )
+//	{
+//		if (*it)
+//			++it;
+//		else
+//			it = mesh_nodes.erase(it);
+//	}
+//
+//	return new_mesh;
 }
 
 std::vector<GeoLib::PointWithID*> MshEditor::getSurfaceNodes(const MeshLib::Mesh &mesh)
