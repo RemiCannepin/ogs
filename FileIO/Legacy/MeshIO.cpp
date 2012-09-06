@@ -68,6 +68,7 @@ MeshLib::Mesh* MeshIO::loadMeshFromFile(const std::string& file_name)
 				getline(in, line_string);
 				trim(line_string);
 				unsigned nNodes = atoi(line_string.c_str());
+				nodes.reserve (nNodes);
 				std::string s;
 				for (unsigned i = 0; i < nNodes; i++)
 				{
@@ -104,6 +105,12 @@ MeshLib::Mesh* MeshIO::loadMeshFromFile(const std::string& file_name)
 
 		MeshLib::Mesh* mesh (new MeshLib::Mesh(BaseLib::getFileNameFromPath(file_name), nodes, elements));
 		mesh->setEdgeLengthRange(sqrt(edge_length[0]), sqrt(edge_length[1]));
+
+		// delete nodes
+		const size_t n_nodes(nodes.size());
+		for (unsigned i = 0; i < n_nodes; i++) {
+			delete nodes[i];
+		}
 
 		std::cout << "finished." << std::endl;
 		std::cout << "Nr. Nodes: " << nodes.size() << std::endl;
