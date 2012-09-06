@@ -45,12 +45,12 @@ Mesh* MeshCoarsener::operator()(double min_distance)
 	}
 
 	// init grid
-	GeoLib::Grid<Node*>* grid(new GeoLib::Grid<Node*>(nodes, 64));
+	GeoLib::Grid<Node>* grid(new GeoLib::Grid<Node>(nodes, 64));
 
 	// init id map
 	std::vector<size_t> id_map(n_nodes);
 	for (size_t k(0); k < n_nodes; k++) {
-		id_map[k] = nodes[k]->getID();
+		id_map[k] = nodes[k].getID();
 	}
 
 	const double sqr_min_distance (min_distance * min_distance);
@@ -58,9 +58,9 @@ Mesh* MeshCoarsener::operator()(double min_distance)
 	// do the work - search nearest nodes
 	for (size_t k(0); k < n_nodes; k++) {
 		std::vector<std::vector<Node*> const*> node_vecs_intersecting_cube;
-		Node const*const node(nodes[k]);
-		const size_t node_id_k(node->getID());
-		grid->getVecsOfGridCellsIntersectingCube(node->getCoords(), min_distance, node_vecs_intersecting_cube);
+		Node const& node(nodes[k]);
+		const size_t node_id_k(node.getID());
+		grid->getVecsOfGridCellsIntersectingCube(node.getCoords(), min_distance, node_vecs_intersecting_cube);
 
 		const size_t n_vecs (node_vecs_intersecting_cube.size());
 		for (size_t i(0); i<n_vecs; i++) {
@@ -70,11 +70,11 @@ Mesh* MeshCoarsener::operator()(double min_distance)
 				Node const*const test_node((*node_vec)[j]);
 				const size_t test_node_id (test_node->getID());
 				if (node_id_k < test_node_id) {
-					if (MathLib::sqrDist(node->getCoords(), test_node->getCoords()) < sqr_min_distance) {
+					if (MathLib::sqrDist(&node, test_node) < sqr_min_distance) {
 						// two nodes are very close to each other
 						id_map[test_node_id] = node_id_k;
 #ifndef NDEBUG
-						INFO ("distance of nodes with ids %d and %d is %f", node_id_k, test_node_id, sqrt(MathLib::sqrDist(node->getCoords(), test_node->getCoords())));
+						INFO ("distance of nodes with ids %d and %d is %f", node_id_k, test_node_id, sqrt(MathLib::sqrDist(&node, test_node)));
 #endif
 					}
 				}
@@ -94,20 +94,12 @@ Mesh* MeshCoarsener::operator()(double min_distance)
 	}
 
 	// delete unused nodes
-	for (size_t k(0), cnt(0); k < n_nodes; k++) {
+	std::vector<Node>::iterator it(nodes.begin());
+	for (size_t k(0), cnt(0); k < n_nodes && it != nodes.end(); k++) {
 		if (id_map[k] != cnt) {
-			delete nodes[k];
-			nodes[k] = NULL;
-		} else {
-			cnt++;
-		}
-	}
-
-	// remove NULL-ptr from node vector
-	for (std::vector<Node*>::iterator it(nodes.begin()); it != nodes.end(); ) {
-		if (*it == NULL) {
 			it = nodes.erase (it);
 		} else {
+			cnt++;
 			it++;
 		}
 	}
@@ -115,7 +107,7 @@ Mesh* MeshCoarsener::operator()(double min_distance)
 	// reset mesh node ids
 	const size_t new_n_nodes(nodes.size());
 	for (size_t k(0); k < new_n_nodes; k++) {
-		nodes[k]->setID(k);
+		nodes[k].setID(k);
 	}
 
 	// copy mesh elements, reset the node pointers
@@ -151,7 +143,7 @@ Mesh* MeshCoarsener::operator()(double min_distance)
 			Element* elem (kth_orig_elem->clone());
 			if (elem != NULL) {
 				for (size_t i(0); i<n_nodes_element; i++) {
-					elem->setNode(i, nodes[mapped_node_ids_of_element[i]]);
+					elem->setNode(i, &nodes[mapped_node_ids_of_element[i]]);
 				}
 				Element* revised_elem(elem->reviseElement());
 				elements[cnt] = revised_elem;
@@ -161,7 +153,7 @@ Mesh* MeshCoarsener::operator()(double min_distance)
 		} else {
 			elements[cnt] = kth_orig_elem->clone();
 			for (size_t i(0); i<n_nodes_element; i++) {
-				elements[cnt]->setNode(i, nodes[mapped_node_ids_of_element[i]]);
+				elements[cnt]->setNode(i, &nodes[mapped_node_ids_of_element[i]]);
 			}
 			cnt++;
 		}

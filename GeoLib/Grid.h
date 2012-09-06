@@ -48,7 +48,8 @@ public:
 	 * @note the somewhat wired template syntax chooses this constructor for non-pointer types
 	 * at compile time
 	 */
-	template <typename T, typename = typename std::enable_if<std::is_same<T, POINT>::value && !std::is_pointer<T>::value>::type>
+//	template <typename T, typename = typename std::enable_if<std::is_same<T, POINT>::value && !std::is_pointer<T>::value>::type>
+	template <typename T, typename std::enable_if<std::is_same<T, POINT>::value && !std::is_pointer<T>::value>::type>
 	Grid(std::vector<T> const& pnts, size_t max_num_per_grid_cell = 512) :
 		GeoLib::AABB(), _grid_cell_nodes_map(NULL)
 	{
@@ -135,7 +136,7 @@ public:
 				std::cout << "error computing indices " << std::endl;
 			}
 
-			_grid_cell_nodes_map[i + j * _n_steps[0] + k * n_plane].push_back(&pnts[l]);
+			_grid_cell_nodes_map[i + j * _n_steps[0] + k * n_plane].push_back(&(pnts[l]));
 		}
 
 #ifndef NDEBUG
@@ -367,7 +368,7 @@ public:
 	 * @param pnts (output) vector of vectors of points within grid cells that intersects
 	 * the axis aligned cube
 	 */
-	void getVecsOfGridCellsIntersectingCube(double const*const pnt, double half_len, std::vector<std::vector<POINT> const*>& pnts) const;
+	void getVecsOfGridCellsIntersectingCube(double const*const pnt, double half_len, std::vector<std::vector<typename std::add_pointer<typename std::remove_pointer<POINT>::type>::type> const*>& pnts) const;
 
 #ifndef NDEBUG
 	/**
@@ -453,7 +454,7 @@ private:
 
 template<typename POINT>
 void Grid<POINT>::getVecsOfGridCellsIntersectingCube(double const* const pnt, double half_len,
-				std::vector<std::vector<POINT> const*>& pnts) const
+				std::vector<std::vector<typename std::add_pointer<typename std::remove_pointer<POINT>::type>::type> const*>& pnts) const
 {
 	double tmp_pnt[3] = { pnt[0] - half_len, pnt[1] - half_len, pnt[2] - half_len }; // min
 	size_t min_coords[3];
