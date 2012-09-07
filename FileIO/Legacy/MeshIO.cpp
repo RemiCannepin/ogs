@@ -179,6 +179,8 @@ MeshLib::Element* MeshIO::readElement(const std::string& line, const std::vector
 		elem = NULL;
 	}
 
+	delete [] idx;
+
 	return elem;
 }
 
