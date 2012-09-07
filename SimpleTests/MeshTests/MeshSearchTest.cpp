@@ -127,6 +127,10 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	for (size_t k(0); k<n; k++) {
+		delete pnts_for_search[k];
+	}
+
 	delete mesh;
 	delete custom_format;
 	delete logog_cout;
