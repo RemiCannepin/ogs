@@ -107,6 +107,9 @@
 #include "BuildInfo.h"
 #endif // OGS_BUILD_INFO
 
+#ifdef OGS_AUTO_UPDATE
+#include "fvupdater.h"
+#endif // OGS_AUTO_UPDATE
 
 using namespace FileIO;
 
@@ -313,6 +316,14 @@ MainWindow::MainWindow(QWidget* parent /* = 0*/)
 	connect(presentationMenu, SIGNAL(aboutToShow()), this,
 	        SLOT(createPresentationMenu()));
 	menuWindows->insertMenu(showVisDockAction, presentationMenu);
+
+	// Setup Check for Updates menu entry
+#ifdef OGS_AUTO_UPDATE
+	QAction* updateAction = new QAction("Check for updates", menuHelp);
+	connect(updateAction, SIGNAL(triggered()),
+		FvUpdater::sharedUpdater(), SLOT(CheckForUpdatesNotSilent()));
+	menuHelp->addAction(updateAction);
+#endif
 
 	_fileFinder.addDirectory(".");
 	_fileFinder.addDirectory(std::string(SOURCEPATH).append("/FileIO"));

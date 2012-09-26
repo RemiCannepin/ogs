@@ -6,6 +6,10 @@
 #endif
 #include "logog.hpp"
 #include "LogogSimpleFormatter.h"
+#ifdef OGS_AUTO_UPDATE
+#include "fvupdater.h"
+#endif // OGS_AUTO_UPDATE
+
 
 int main(int argc, char* argv[])
 {
@@ -16,11 +20,21 @@ int main(int argc, char* argv[])
 	logog::Cout* logogCout = new logog::Cout;
 	BaseLib::LogogSimpleFormatter* formatter = new BaseLib::LogogSimpleFormatter;
 	logogCout->SetFormatter(*formatter);
+
 	QApplication a(argc, argv);
 	QApplication::setApplicationName("OpenGeoSys - Data Explorer");
 	QApplication::setApplicationVersion(QString(OGS_VERSION));
 	QApplication::setOrganizationName("OpenGeoSys Community");
 	QApplication::setOrganizationDomain("opengeosys.org");
+
+#ifdef OGS_AUTO_UPDATE
+	FvUpdater::sharedUpdater()->SetFeedURL
+		("http://www.opengeosys.org/Appcast.xml");
+
+	// Check for updates at startup?
+	FvUpdater::sharedUpdater()->CheckForUpdatesSilent();
+#endif
+
 	setlocale(LC_NUMERIC,"C");
 	MainWindow* w = new MainWindow();
 	w->setWindowTitle( w->windowTitle() + " - " + QString(OGS_VERSION_AND_PERSONS) + " - FirstFloor");
