@@ -39,6 +39,7 @@
 #include "SHPImportDialog.h"
 #endif
 
+#include "GeoMapper.h"
 #include "OGSError.h"
 #include "VtkRaster.h"
 #include "RecentFiles.h"
@@ -149,6 +150,8 @@ MainWindow::MainWindow(QWidget* parent /* = 0*/)
 	// geo model connects
 	connect(geoTabWidget->treeView, SIGNAL(listRemoved(std::string, GeoLib::GEOTYPE)),
 	        _geoModels, SLOT(removeGeometry(std::string, GeoLib::GEOTYPE)));
+	connect(geoTabWidget->treeView, SIGNAL(geometryMappingRequested(const std::string&)),
+	        this, SLOT(mapGeometry(const std::string&)));
 	connect(geoTabWidget->treeView, SIGNAL(saveToFileRequested(QString, QString)),
 	        this, SLOT(writeGeometryToFile(QString, QString))); // save geometry to file
 	connect(geoTabWidget->treeView, SIGNAL(requestLineEditDialog(const std::string &)),
@@ -908,6 +911,33 @@ void MainWindow::writeStationListToFile(QString listName, QString fileName)
 	XmlStnInterface xml(&_project, schemaName);
 	xml.setNameForExport(listName.toStdString());
 	xml.writeToFile(fileName.toStdString());
+}
+
+void MainWindow::mapGeometry(const std::string &geo_name)
+{
+	QSettings settings("UFZ", "OpenGeoSys-5");
+	QString mesh_name = QFileDialog::getOpenFileName( this, "Select a mesh file for mapping",
+													  settings.value("lastOpenedFileDirectory").toString(),
+													  "OpenGeoSys mesh files (*.msh)");
+	if (mesh_name.compare("") != 0)
+	{
+		MeshLib::Mesh* mesh (NULL);
+		QFileInfo fi(mesh_name);
+		if (fi.suffix().toLower() == "vtu")
+			mesh = VTKInterface::readVTUFile(mesh_name.toStdString());
+		else if (fi.suffix().toLower() == "msh")
+		{
+			FileIO::MeshIO mesh_io;
+			mesh = mesh_io.loadMeshFromFile(mesh_name.toStdString());
+		}
+
+		if (mesh)
+		{
+			GeoMapper geo_mapper(*_geoModels, geo_name);
+			geo_mapper.mapOnMesh(mesh);
+			this->_geoModels->updateGeometry(geo_name);
+		}
+	}
 }
 
 void MainWindow::exportBoreholesToGMS(std::string listName,
