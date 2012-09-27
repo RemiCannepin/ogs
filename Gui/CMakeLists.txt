@@ -21,16 +21,20 @@ ENDIF()
 
 IF(OGS_AUTO_UPDATE)
 	IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Base/fervor)
-		#IF(NOT ${TAR_TOOL_PATH})
-		#	MESSAGE(FATAL_ERROR "Tar was not found but is needed for OGS_AUTO_UPDATE")
-		#ENDIF()
 		FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Base/fervor)
-		FILE(DOWNLOAD https://github.com/bilke/fervor/tarball/cmake-build
-			${CMAKE_CURRENT_SOURCE_DIR}/fervor.tar.gz TIMEOUT 60)
-		# Untar, --strip 1 ignores first directory in tarball
 		EXECUTE_PROCESS(
-			COMMAND tar -xzf ${CMAKE_CURRENT_SOURCE_DIR}/fervor.tar.gz --strip 1
-			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Base/fervor)
+			COMMAND curl -L https://github.com/bilke/fervor/tarball/cmake-build
+			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+			OUTPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/fervor.tar.gz
+		)
+		# Untar, --strip 1 ignores first directory in tarball, relative path to
+		# tarball is needed on Windows
+		EXECUTE_PROCESS(
+			COMMAND tar -xzf ../../fervor.tar.gz --strip 1
+			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Base/fervor
+			ERROR_VARIABLE OUTPUT_STATUS
+		)
+		MESSAGE(STATUS ${OUTPUT_STATUS})
 		FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/fervor.tar.gz)
 	ENDIF()
 	ADD_DEFINITIONS(-DOGS_AUTO_UPDATE)
@@ -38,7 +42,6 @@ IF(OGS_AUTO_UPDATE)
 	SET(FERVOR_APP_VERSION "${OGS_VERSION}")
 	ADD_SUBDIRECTORY(Base/fervor)
 	INCLUDE_DIRECTORIES(Base/fervor)
-	CONFIGURE_FILE(Appcast.xml.in Appcast.xml)
 ENDIF()
 
 INCLUDE( DataExplorer.cmake )
